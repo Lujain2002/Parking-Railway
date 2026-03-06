@@ -13,7 +13,7 @@ namespace ParkingSystem.Relay
 
         //http://parkly2026-001-site1.rtempurl.com/api/MqttGateway
         //https://localhost:7111/api/MqttGateway
-        private const string BaseApiUrl = "http://parkly2026-001-site1.rtempurl.com/api/MqttGateway;
+        private const string BaseApiUrl = "http://parkly2026-001-site1.rtempurl.com/api/MqttGateway";
 
         public Worker(ILogger<Worker> logger) => _logger = logger;
 

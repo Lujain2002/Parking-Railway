@@ -32,3 +32,4 @@ C:\Users\Lenovo\Desktop\Backend2026\ParkingSystem.Relay\ParkingSystem.Relay\obj\
 C:\Users\Lenovo\Desktop\Backend2026\ParkingSystem.Relay\ParkingSystem.Relay\obj\Debug\net8.0\ParkingSystem.Relay.pdb
 C:\Users\Lenovo\Desktop\Backend2026\ParkingSystem.Relay\ParkingSystem.Relay\obj\Debug\net8.0\ParkingSystem.Relay.genruntimeconfig.cache
 C:\Users\Lenovo\Desktop\Backend2026\ParkingSystem.Relay\ParkingSystem.Relay\obj\Debug\net8.0\ref\ParkingSystem.Relay.dll
+C:\Users\Lenovo\Desktop\Backend2026\ParkingSystem.Relay\ParkingSystem.Relay\obj\Debug\net8.0\ParkingSystem.Relay.sourcelink.json

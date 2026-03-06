@@ -11,7 +11,7 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-
+ 
 app.MapGet("/", () => "Parking System Relay is Running and Connected to MQTT...");
 
 
