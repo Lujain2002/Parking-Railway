@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "KSEZe5OjQ2ECNdW5O5IyJalEKkWJAJJ36JbFA0ITYsc=",
+  "Source": "ParkingSystem.Relay",
+  "BasePath": "_content/ParkingSystem.Relay",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

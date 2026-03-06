@@ -1,0 +1,6 @@
+@ParkingSystem.Relay_HostAddress = http://localhost:5131
+
+GET {{ParkingSystem.Relay_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
