@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ParkingSystem.Relay")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+16e67976f27ce4dfd666f3ec7e9cfbf34089ef03")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ee8daaa89aa287a41cfcaa43a8ef7a1764eec144")]
 [assembly: System.Reflection.AssemblyProductAttribute("ParkingSystem.Relay")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ParkingSystem.Relay")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

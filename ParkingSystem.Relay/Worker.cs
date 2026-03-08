@@ -61,12 +61,28 @@ namespace ParkingSystem.Relay
                         {
                             foreach (var cmd in commands)
                             {
-                                var msg = new MqttApplicationMessageBuilder()
-                                    .WithTopic(cmd.Topic)
-                                    .WithPayload(cmd.Payload)
-                                    .Build();
-                                await _mqttClient.PublishAsync(msg, stoppingToken);
-                                _logger.LogInformation($"[API -> MQTT] Sent: {cmd.Payload} to {cmd.Topic}");
+                                try
+                                {
+                                    var msg = new MqttApplicationMessageBuilder()
+                                        .WithTopic(cmd.Topic)
+                                        .WithPayload(cmd.Payload)
+                                        .Build();
+
+                                  
+                                    await _mqttClient.PublishAsync(msg, stoppingToken);
+                                    _logger.LogInformation($"[API -> MQTT] Sent: {cmd.Payload}");
+
+                                   
+                                    var confirmRes = await _httpClient.PostAsync($"{BaseApiUrl}/confirm-command/{cmd.Id}", null);
+
+                                    if (confirmRes.IsSuccessStatusCode)
+                                        _logger.LogInformation($"Command {cmd.Id} confirmed as processed.");
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogError($"Failed to process command {cmd.Id}: {ex.Message}");
+                                    
+                                }
                             }
                         }
                     }
@@ -95,5 +111,9 @@ namespace ParkingSystem.Relay
         }
     }
 
-    public class MqttCommand { public string Topic { get; set; } public string Payload { get; set; } }
+    public class MqttCommand { 
+        public int Id { get; set; }
+        public string Topic { get; set; }
+        public string Payload { get; set; }
+    }
 }

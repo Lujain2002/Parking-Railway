@@ -1,7 +1,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# וÐÇ ÇבÓØÑ םÈÍË Úה ÇבדבÝ Ýם Ãם ד‗Çה ÏÇÎב ÇבדÓÊזÏÚ זםהÓÎו בבדÌבÏ ÇבÍÇבם
+
 COPY **/ParkingSystem.Relay.csproj ./
 RUN dotnet restore
 
