@@ -8,11 +8,17 @@ namespace ParkingSystem.Relay
     public class Worker : BackgroundService
     {
         private readonly ILogger<Worker> _logger;
-        private readonly HttpClient _httpClient = new();
+        private readonly HttpClient _httpClient = new()
+        {
+            Timeout = TimeSpan.FromSeconds(10)
+        };
         private IMqttClient _mqttClient;
+        private MqttClientOptions _mqttOptions;
 
         //http://parkly2026-001-site1.rtempurl.com/api/MqttGateway
+
         //https://localhost:7111/api/MqttGateway
+
         private const string BaseApiUrl = "http://parkly2026-001-site1.rtempurl.com/api/MqttGateway";
 
         public Worker(ILogger<Worker> logger) => _logger = logger;
@@ -22,13 +28,42 @@ namespace ParkingSystem.Relay
             var factory = new MqttFactory();
             _mqttClient = factory.CreateMqttClient();
 
-            var options = new MqttClientOptionsBuilder()
+            
+            _mqttOptions = new MqttClientOptionsBuilder()
                 .WithTcpServer("c335c915f7a540bcb9d83b6f4b0444f3.s1.eu.hivemq.cloud", 8883)
                 .WithCredentials("esp32_worker", "ParkMaster2026")
                 .WithTls(new MqttClientOptionsBuilderTlsParameters { UseTls = true })
+                .WithCleanSession()
+                .WithKeepAlivePeriod(TimeSpan.FromSeconds(30))
                 .Build();
 
-           
+        
+            _mqttClient.DisconnectedAsync += async e =>
+            {
+                _logger.LogWarning("Disconnected from HiveMQ. Reason: {0}", e.Reason);
+                await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken); 
+
+                try
+                {
+                    if (!stoppingToken.IsCancellationRequested)
+                    {
+                        await _mqttClient.ConnectAsync(_mqttOptions, stoppingToken);
+                        _logger.LogInformation("Reconnected successfully.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Reconnect failed: {ex.Message}");
+                }
+            };
+
+         
+            _mqttClient.ConnectedAsync += async e =>
+            {
+                await _mqttClient.SubscribeAsync("#");
+                _logger.LogInformation("Subscribed to topics after connection.");
+            };
+
             _mqttClient.ApplicationMessageReceivedAsync += async e =>
             {
                 string topic = e.ApplicationMessage.Topic;
@@ -39,19 +74,18 @@ namespace ParkingSystem.Relay
                     var payload = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
                     _logger.LogInformation($"[MQTT -> API] Data: {payload}");
 
-                    
                     await _httpClient.PostAsJsonAsync($"{BaseApiUrl}/update-reading",
                         JsonSerializer.Deserialize<object>(payload), stoppingToken);
                 }
                 catch (Exception ex) { _logger.LogError($"Relay Post Error: {ex.Message}"); }
             };
 
-        
-            await ConnectWithRetryAsync(options, stoppingToken);
+          
+            await ConnectWithRetryAsync(_mqttOptions, stoppingToken);
 
-            
             while (!stoppingToken.IsCancellationRequested)
             {
+                
                 if (_mqttClient.IsConnected)
                 {
                     try
@@ -68,21 +102,12 @@ namespace ParkingSystem.Relay
                                         .WithPayload(cmd.Payload)
                                         .Build();
 
-                                  
                                     await _mqttClient.PublishAsync(msg, stoppingToken);
                                     _logger.LogInformation($"[API -> MQTT] Sent: {cmd.Payload}");
 
-                                   
-                                    var confirmRes = await _httpClient.PostAsync($"{BaseApiUrl}/confirm-command/{cmd.Id}", null);
-
-                                    if (confirmRes.IsSuccessStatusCode)
-                                        _logger.LogInformation($"Command {cmd.Id} confirmed as processed.");
+                                    await _httpClient.PostAsync($"{BaseApiUrl}/confirm-command/{cmd.Id}", null);
                                 }
-                                catch (Exception ex)
-                                {
-                                    _logger.LogError($"Failed to process command {cmd.Id}: {ex.Message}");
-                                    
-                                }
+                                catch (Exception ex) { _logger.LogError($"Command Error: {ex.Message}"); }
                             }
                         }
                     }
@@ -99,21 +124,20 @@ namespace ParkingSystem.Relay
                 try
                 {
                     await _mqttClient.ConnectAsync(options, ct);
-                    await _mqttClient.SubscribeAsync("#");
                     _logger.LogInformation("Connected to HiveMQ successfully!");
                 }
                 catch
                 {
-                    _logger.LogError("Connection failed, retrying in 5s...");
+                    _logger.LogError("Initial connection failed, retrying in 5s...");
                     await Task.Delay(5000, ct);
                 }
             }
         }
     }
+}
 
-    public class MqttCommand { 
+public class MqttCommand { 
         public int Id { get; set; }
         public string Topic { get; set; }
         public string Payload { get; set; }
     }
-}
